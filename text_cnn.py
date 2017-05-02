@@ -8,7 +8,7 @@ class TextCNN(object):
 
         # Placeholders
         self.input_x = tf.placeholder(tf.int32, [None, sequence_length], name="input_x")
-        self.input_y = tf.placeholder(tf.float32, [None, sequence_length], name="input_y")
+        self.input_y = tf.placeholder(tf.float32, [None, num_classes], name="input_y")
         self.dropout_prob = tf.placeholder(tf.float32, name="dropout_prob")
 
         l2_loss = tf.constant(0.0)
@@ -20,12 +20,12 @@ class TextCNN(object):
             self.embedded_expanded = tf.expand_dims(self.embedded, -1)  #在最后加一维 (x, y) -> (x, y, 0)
 
         # Conv Layer & Maxpool Layer
-        pooled_output = []
+        pooled_outputs = []
         for i, filter_size in enumerate(filter_sizes):
             with tf.name_scope("conv-maxpool-%s" % filter_size):
                 # Conv Layer
                 filter_shape = [filter_size, embedding_size, 1, num_filters]
-                W = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1, name="W"))
+                W = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1), name="W")
                 b = tf.Variable(tf.constant(0.1, shape=[num_filters]), name="b")
                 conv = tf.nn.conv2d(
                     self.embedded_expanded,
@@ -37,14 +37,15 @@ class TextCNN(object):
 
                 pooled = tf.nn.max_pool(
                     h,
-                    ksize=[1, sequence_length, embedding_size - filter_size + 1, 1, 1],
+                    ksize=[1, sequence_length - filter_size + 1, 1, 1],
                     strides=[1, 1, 1, 1],
                     padding='VALID',
                     name="pool")    # 对每个卷积核的多个结果取MAX，每个卷积核仅对应一个结果
-                pooled_output.append(pooled)
+                pooled_outputs.append(pooled)
+
 
         num_filters_total = num_filters * len(filter_sizes)
-        self.h_pool = tf.concat(pooled_output, 3)
+        self.h_pool = tf.concat(pooled_outputs, 3)
         self.h_pool_flat = tf.reshape(self.h_pool, [-1, num_filters_total])  # reshape -> 1 * num_filters_total
 
         # Dropout layer
