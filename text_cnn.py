@@ -54,14 +54,14 @@ class TextCNN(object):
 
         # Final (unnormalized) scores and predictions
         with tf.name_scope("output"):
-            W = tf.get_variable(
+            self.output_W = tf.get_variable(
                 "W",
                 shape=[num_filters_total, num_classes],
                 initializer=tf.contrib.layers.xavier_initializer())
             b = tf.Variable(tf.constant(0.1, shape=[num_classes]), name="b")
-            l2_loss += tf.nn.l2_loss(W)
+            l2_loss += tf.nn.l2_loss(self.output_W)
             l2_loss += tf.nn.l2_loss(b)
-            self.scores = tf.nn.xw_plus_b(self.h_drop, W, b, name="scores")
+            self.scores = tf.nn.xw_plus_b(self.h_drop, self.output_W, b, name="scores")
             self.predictions = tf.argmax(self.scores, 1, name="predictions")
 
         # CalculateMean cross-entropy loss

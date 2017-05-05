@@ -136,37 +136,6 @@ with tf.Graph().as_default():
         # Initialize all variables
         sess.run(tf.global_variables_initializer())
 
-        # # Word2Vec
-        # if FLAGS.word2vec:
-        #     initW = np.random.uniform(-0.25, 0.25, (len(vocab_processor.vocabulary_), FLAGS.embedding_dim))
-        #     print("Load word2vec file {}\n".format(FLAGS.word2vec))
-        #     with open(FLAGS.word2vec, "rb") as f:
-        #         header = f.readline()
-        #         vocab_size, layer1_size = map(int, header.split())
-        #         binary_len = np.dtype('float32').itemsize * layer1_size
-        #         for line in range(vocab_size):
-        #             word = []
-        #             while True:
-        #                 ch = f.read(1)
-        #                 if ch == ' ':
-        #                     word = ''.join(word)
-        #                     break
-        #                 if ch != '\n':
-        #                     word.append(ch)
-        #
-        #                 del ch
-        #                 print(word)
-        #             idx = vocab_processor.vocabulary_.get(word)
-        #
-        #             print(word)
-        #             del word
-        #
-        #             if idx != None:
-        #                 initW[idx] = np.fromstring(f.read(binary_len), dtype='float32')
-        #             else:
-        #                 f.read(binary_len)
-        #     sess.run(cnn.W.assign(initW))
-
         if FLAGS.word2vec:
             # initial matrix with random uniform
             initW = np.random.uniform(-0.25,0.25,(len(vocab_processor.vocabulary_), FLAGS.embedding_dim))
@@ -192,7 +161,6 @@ with tf.Graph().as_default():
                         initW[idx] = np.fromstring(f.read(binary_len), dtype='float32')
                     else:
                         f.read(binary_len)
-
             sess.run(cnn.W.assign(initW))
 
         def train_step(x_batch, y_batch):
@@ -204,6 +172,7 @@ with tf.Graph().as_default():
             _, step, summaries, loss, accuracy = sess.run(
                 [train_op, global_step, train_summary_op, cnn.loss, cnn.accuracy],
                 feed_dict)
+            sess.run(cnn.output_W.assign(tf.clip_by_norm(cnn.output_W, 3.0)))
             time_str = datetime.datetime.now().isoformat()
             print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
             train_summary_writer.add_summary(summaries, step)
