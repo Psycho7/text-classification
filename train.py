@@ -146,7 +146,6 @@ with tf.Graph().as_default():
                 vocab_size, layer1_size = map(int, header.split())
                 binary_len = np.dtype('float32').itemsize * layer1_size
                 for line in range(vocab_size):
-                    print(line)
                     word = []
                     while True:
                         ch = f.read(1).decode('latin-1')
@@ -155,7 +154,6 @@ with tf.Graph().as_default():
                             break
                         if ch != '\n':
                             word.append(ch)
-                    print(word)
                     idx = vocab_processor.vocabulary_.get(word)
                     if idx != 0:
                         initW[idx] = np.fromstring(f.read(binary_len), dtype='float32')
