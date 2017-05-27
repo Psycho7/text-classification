@@ -14,7 +14,7 @@ import csv
 # ==================================================
 
 # Eval Parameters
-tf.flags.DEFINE_integer("batch_size", 128, "Batch Size (default: 128)")
+tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
 tf.flags.DEFINE_string("checkpoint_dir", "", "Checkpoint directory from training run")
 tf.flags.DEFINE_boolean("eval_train", False, "Evaluate on all training data")
 
@@ -31,8 +31,7 @@ for attr, value in sorted(FLAGS.__flags.items()):
 print("")
 
 x_raw, y_test = data_helpers.load_data_and_labels(
-                    './data/rt-polaritydata/rt-polarity.pos',
-                    './data/rt-polaritydata/rt-polarity.neg')
+                    './data/sougou/1000x10.txt')
 y_test = np.argmax(y_test, axis=1)
 
 # Map data into vocabulary

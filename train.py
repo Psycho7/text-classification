@@ -11,7 +11,7 @@ from tensorflow.contrib import learn
 # ==================================================
 
 # Data loading params
-tf.flags.DEFINE_string("word2vec", None, "Word2vec file with pre-trained embeddings (default: None)")
+# tf.flags.DEFINE_string("word2vec", None, "Word2vec file with pre-trained embeddings (default: None)")
 tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
 
 # Model Hyperparameters
@@ -46,8 +46,7 @@ print("")
 # Load data
 print("Loading data...")
 x_text, y = data_helpers.load_data_and_labels(
-    "./data/rt-polaritydata/rt-polarity.pos",
-    "./data/rt-polaritydata/rt-polarity.neg")
+    "./data/sougou/1000x10.txt")
 
 # Build vocabulary
 max_document_length = max([len(x.split(" ")) for x in x_text])
@@ -136,30 +135,30 @@ with tf.Graph().as_default():
         # Initialize all variables
         sess.run(tf.global_variables_initializer())
 
-        if FLAGS.word2vec:
-            # initial matrix with random uniform
-            initW = np.random.uniform(-0.25,0.25,(len(vocab_processor.vocabulary_), FLAGS.embedding_dim))
-            # load any vectors from the word2vec
-            print("Load word2vec file {}\n".format(FLAGS.word2vec))
-            with open(FLAGS.word2vec, "rb") as f:
-                header = f.readline()
-                vocab_size, layer1_size = map(int, header.split())
-                binary_len = np.dtype('float32').itemsize * layer1_size
-                for line in range(vocab_size):
-                    word = []
-                    while True:
-                        ch = f.read(1).decode('latin-1')
-                        if ch == ' ':
-                            word = ''.join(word)
-                            break
-                        if ch != '\n':
-                            word.append(ch)
-                    idx = vocab_processor.vocabulary_.get(word)
-                    if idx != 0:
-                        initW[idx] = np.fromstring(f.read(binary_len), dtype='float32')
-                    else:
-                        f.read(binary_len)
-            sess.run(cnn.W.assign(initW))
+        # if FLAGS.word2vec:
+        #     # initial matrix with random uniform
+        #     initW = np.random.uniform(-0.25,0.25,(len(vocab_processor.vocabulary_), FLAGS.embedding_dim))
+        #     # load any vectors from the word2vec
+        #     print("Load word2vec file {}\n".format(FLAGS.word2vec))
+        #     with open(FLAGS.word2vec, "rb") as f:
+        #         header = f.readline()
+        #         vocab_size, layer1_size = map(int, header.split())
+        #         binary_len = np.dtype('float32').itemsize * layer1_size
+        #         for line in range(vocab_size):
+        #             word = []
+        #             while True:
+        #                 ch = f.read(1).decode('latin-1')
+        #                 if ch == ' ':
+        #                     word = ''.join(word)
+        #                     break
+        #                 if ch != '\n':
+        #                     word.append(ch)
+        #             idx = vocab_processor.vocabulary_.get(word)
+        #             if idx != 0:
+        #                 initW[idx] = np.fromstring(f.read(binary_len), dtype='float32')
+        #             else:
+        #                 f.read(binary_len)
+        #     sess.run(cnn.W.assign(initW))
 
         def train_step(x_batch, y_batch):
             feed_dict = {
