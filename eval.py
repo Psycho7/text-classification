@@ -14,9 +14,9 @@ import csv
 # ==================================================
 
 # Eval Parameters
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
+tf.flags.DEFINE_integer("batch_size", 100, "Batch Size (default: 100)")
 tf.flags.DEFINE_string("checkpoint_dir", "", "Checkpoint directory from training run")
-tf.flags.DEFINE_boolean("eval_train", False, "Evaluate on all training data")
+# tf.flags.DEFINE_boolean("eval_train", False, "Evaluate on all training data")
 
 # Misc Parameters
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
@@ -31,7 +31,7 @@ for attr, value in sorted(FLAGS.__flags.items()):
 print("")
 
 x_raw, y_test = data_helpers.load_data_and_labels(
-                    './data/sougou/1000x10.txt')
+                    './data/sougou/500x10.txt')
 y_test = np.argmax(y_test, axis=1)
 
 # Map data into vocabulary
@@ -82,8 +82,12 @@ if y_test is not None:
     print("Accuracy: {:g}".format(correct_predictions/float(len(y_test))))
 
 # Save the evaluation to a csv
-predictions_human_readable = np.column_stack((np.array(x_raw), all_predictions))
+[_, _, id_2_cls] = data_helpers.get_classes()
+all_predictions = [id_2_cls[item] for item in all_predictions]
+y_test = [id_2_cls[item] for item in y_test]
+
+predictions_human_readable = np.column_stack((np.array(x_raw), all_predictions, y_test))
 out_path = os.path.join(FLAGS.checkpoint_dir, "..", "prediction.csv")
 print("Saving evaluation to {0}".format(out_path))
-with open(out_path, 'w') as f:
+with open(out_path, 'w', encoding='utf-8') as f:
     csv.writer(f).writerows(predictions_human_readable)
